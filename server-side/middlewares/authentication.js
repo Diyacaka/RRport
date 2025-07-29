@@ -1,4 +1,4 @@
-import { verifyToken } from "../helpers/jwt";
+import { verifyToken } from "../helpers/jwt.js";
 
 export async function authentication(req, res, next) {
   try {
@@ -14,7 +14,7 @@ export async function authentication(req, res, next) {
 
     req.user = {
       id: token.id,
-      role: token.role_id,
+      role: token.role,
     };
     next();
   } catch (error) {

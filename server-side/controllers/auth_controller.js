@@ -60,7 +60,7 @@ export const login = async (req, res, next) => {
 
     const token = await signToken({
       id: user.id,
-      user: user.role_id,
+      role: user.role_id,
     });
     res.status(200).json({
       messages: `Login succesfull`,
