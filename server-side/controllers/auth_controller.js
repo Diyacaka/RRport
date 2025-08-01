@@ -27,7 +27,7 @@ export const register = async (req, res, next) => {
     const existingEmail = await getUserEmail(email);
     // console.log(existingEmail, `<exist email`);
 
-    if (existingEmail.length > 0) {
+    if (existingEmail) {
       res.status(409).json({ messages: `Email already registered` });
     }
     const hashedPassword = await hashPassword(password);
