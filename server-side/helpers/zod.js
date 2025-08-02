@@ -41,9 +41,13 @@ export const guardianUpdateSchema = z.object({
 
 export const studentRegisterSchema = z.object({
   full_name : z.string().min(1,'field cannot be empty'),
+  photo_profile : z.string().url('Photo must be valid').optional(),
   gender : z.enum(['male', 'female']),
   address : z.string().optional(),
-  birth_date : z.string().date(),
+  birth_date: z.string().refine(
+    (val) => !isNaN(Date.parse(val)),
+    { message: 'Invalid date format (expected YYYY-MM-DD)' }
+  ),
   nisn : z.string().min(1,'field cannot be empty'),
   classes : z.string().min(1, 'field cannot be empty')
 })

@@ -54,6 +54,11 @@ export async function newGuardian(
       ]
     );
 
+    await pool.query(
+      `update users set is_profile_complete = true where id=$1`,
+      [user_id]
+    );
+    // await pool.query("commit");
     return res;
   } catch (error) {
     throw error;
@@ -93,26 +98,6 @@ export async function softDeleteGuardian(id) {
   }
 }
 
-export async function newStudent(
-  user_id,
-  full_name,
-  role_id,
-  photo_profile,
-  nisn,
-  classes
-) {
-  try {
-    const res = await pool.query(
-      `insert into students (user_id, full_name,role_id, photo_profile, nisn, class returning id)
-      values($1,$2,$3,$4,$5,$6)`,
-      [user_id, full_name, role_id, photo_profile, nisn, classes]
-    );
-    return res;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function getStudentName(full_name) {
   try {
     const res = await pool.query(
@@ -120,6 +105,63 @@ export async function getStudentName(full_name) {
       [`%${full_name}%`]
     );
     return res.rows;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function newStudent(
+  guardian_id,
+  full_name,
+  role_id,
+  photo_profile,
+  gender,
+  address,
+  birth_date,
+  nisn,
+  classes
+) {
+  try {
+    const res = await pool.query(
+      `insert into student (guardian_id, full_name,role_id, photo_profile, gender, address, birth_date, nisn, class returning id)
+      values($1,$2,$3,$4,$5,$6)`,
+      [
+        guardian_id,
+        full_name,
+        role_id,
+        photo_profile,
+        gender,
+        address,
+        birth_date,
+        nisn,
+        classes,
+      ]
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateStudent(full_name, photo_profile, nisn, classes) {
+  try {
+    const res = await pool.query(
+      `update student set full_name=$1, photo_profile=$2, nisn=$3, classes=$4 where is_deleted=false and updated_at=now() returning id`,
+      [full_name, photo_profile, nisn, classes]
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function softDeleteStudent(id) {
+  try {
+    const res = await pool.query(
+      `update student set is_deleted=true, deleted_at=now() where id=$1 `,
+      [id]
+    );
+    return res;
   } catch (error) {
     throw error;
   }

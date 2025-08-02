@@ -36,6 +36,7 @@ export const register = async (req, res, next) => {
       message: "Reistrasi sukses",
       uID: result.id,
     });
+
   } catch (error) {
     if (error.code === `23505`) {
       return res.json({ messages: `Email already registered` });
@@ -61,9 +62,11 @@ export const login = async (req, res, next) => {
     const token = await signToken({
       id: user.id,
       role: user.role_id,
+      isProfileComplete: user.is_profile_complete
     });
+
     res.status(200).json({
-      messages: `Login succesfull`,
+      messages: `Login succesfull complete your profile`,
       data: token,
     });
   } catch (error) {

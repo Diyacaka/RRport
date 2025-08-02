@@ -1,11 +1,14 @@
 import {
   guardianRegisterSchema,
   guardianUpdateSchema,
+  studentRegisterSchema,
 } from "../helpers/zod.js";
 import {
   getGuardian,
   getGuardianID,
+  getStudentName,
   newGuardian,
+  newStudent,
   softDeleteGuardian,
   updateGuardian,
 } from "../models/guardian_model.js";
@@ -47,6 +50,11 @@ export async function getGuardianHandler(req, res, next) {
 export async function newGuardianHandler(req, res, next) {
   try {
     const { id: user_id, role: role_id } = req.user;
+    if (req.user.isProfileComplete) {
+      return res.status(400).json({ 
+        message: "Profile already completed" 
+      });
+    }
     const {
       full_name,
       photo_profile,
@@ -56,6 +64,7 @@ export async function newGuardianHandler(req, res, next) {
       phone_number,
       emergency_number,
     } = guardianRegisterSchema.parse(req.body);
+
     const result = await newGuardian(
       user_id,
       full_name,
@@ -80,7 +89,6 @@ export async function updateGuardianHandler(req, res, next) {
     const guardian = await getGuardianID(id);
 
     console.log(guardian);
-     
 
     if (!guardian) {
       return res
@@ -95,7 +103,7 @@ export async function updateGuardianHandler(req, res, next) {
       data.job,
       data.address,
       data.phone_number,
-      data.emergency_number??'-',
+      data.emergency_number ?? "-",
       id
     );
 
@@ -107,17 +115,62 @@ export async function updateGuardianHandler(req, res, next) {
 
 export async function softDeleteGuardianHandler(req, res, next) {
   try {
-    const {id} = req.params
-    const guardian = await getGuardian(id)
+    const { id } = req.params;
+    const guardian = await getGuardian(id);
     console.log(guardian);
-    
+
     if (!guardian) {
-      res.status(404).json({messages:'Guardian Does Not exist'})
+      res.status(404).json({ messages: "Guardian Does Not exist" });
     }
 
-    const result = await softDeleteGuardian(id)
-    res.status(200).json({messages:'Delete Succes'})
+    const result = await softDeleteGuardian(id);
+    res.status(200).json({ messages: "Delete Succes", data: result });
   } catch (error) {
-    throw error
+    throw error;
+  }
+}
+
+export async function getStudentNameHandler(req, res, next) {
+  try {
+    const { full_name } = req.params;
+    const student = await getStudentName(full_name);
+    if (!student) {
+      res.status(404).json({ messages: "No student with that name" });
+    }
+
+    return res.status(200).json({ data: student });
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function newStudentHandler(req, res, next) {
+  try {
+    const { id: user_id, role: role_id } = req.user;
+    const {
+      full_name,
+      photo_profile,
+      gender,
+      address,
+      birth_date,
+      nisn,
+      classes,
+    } = studentRegisterSchema.parse(req.body);
+    const result = await newStudent(
+      user_id,
+      full_name,
+      role_id,
+      photo_profile,
+      gender,
+      address,
+      birth_date,
+      nisn,
+      classes
+    );
+    return res
+      .status(200)
+      .json({ messages: "new student added", data: result });
+  } catch (error) {
+    throw error;
   }
 }
