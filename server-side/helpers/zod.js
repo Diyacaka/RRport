@@ -39,15 +39,24 @@ export const guardianUpdateSchema = z.object({
   emergency_number: z.string().optional(),
 });
 
+///// - STUDENT SECTION - /////
+
 export const studentRegisterSchema = z.object({
-  full_name : z.string().min(1,'field cannot be empty'),
-  photo_profile : z.string().url('Photo must be valid').optional(),
-  gender : z.enum(['male', 'female']),
-  address : z.string().optional(),
-  birth_date: z.string().refine(
-    (val) => !isNaN(Date.parse(val)),
-    { message: 'Invalid date format (expected YYYY-MM-DD)' }
-  ),
-  nisn : z.string().min(1,'field cannot be empty'),
-  classes : z.string().min(1, 'field cannot be empty')
-})
+  full_name: z.string().min(1, "field cannot be empty"),
+  photo_profile: z.string().url("Photo must be valid").optional(),
+  gender: z.enum(["male", "female"]),
+  address: z.string().optional(),
+  birth_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format (expected YYYY-MM-DD)",
+  }),
+  nisn: z.string().min(1, "field cannot be empty"),
+  classes: z.string().min(1, "field cannot be empty"),
+});
+
+export const studentUpdateSchema = z.object({
+  full_name: z.string().min("1").optional(),
+  photo_profile: z.string().url().optional(),
+  address: z.string().optional(),
+  nisn: z.string().optional(),
+  classes: z.string().optional(),
+});

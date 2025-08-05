@@ -30,6 +30,7 @@ export const register = async (req, res, next) => {
     if (existingEmail) {
       res.status(409).json({ messages: `Email already registered` });
     }
+    
     const hashedPassword = await hashPassword(password);
     const result = await newUSer(email, hashedPassword, role_id);
     res.status(201).json({
