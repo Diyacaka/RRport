@@ -4,6 +4,8 @@ import guardianRouter from "./guardian_router.js";
 // import studentRouter from "./student_router.js";
 const router = express.Router();
 
+
+
 router.use("/auth", auth_router);
 router.use("/guardian", guardianRouter)
 // router.use("/student", studentRouter)

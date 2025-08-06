@@ -88,17 +88,17 @@ export async function updateGuardian(
   }
 }
 
-export async function softDeleteGuardian(id) {
-  try {
-    const res = await pool.query(
-      `update guardian set is_deleted=true, deleted_at=now() where id = $1`,
-      [id]
-    );
-    return res.rowCount;
-  } catch (error) {
-    throw error;
-  }
-}
+// export async function softDeleteGuardian(id) {
+//   try {
+//     const res = await pool.query(
+//       `update guardian set is_deleted=true, deleted_at=now() where id = $1`,
+//       [id]
+//     );
+//     return res.rowCount;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 ////////// - STUDENT SECTION - //////////
 
@@ -109,7 +109,7 @@ export async function getStudentID(id) {
       select full_name, photo_profile, nisn, class from students where id=$1 and is_deleted = false`,
       [id]
     );
-    return res.rows[0]
+    return res.rows[0];
   } catch (error) {
     throw error;
   }
@@ -121,7 +121,7 @@ export async function getStudentName(full_name) {
       `select full_name, photo_profile, nisn, class from students where full_name ILIKE $1 and is_deleted = false`,
       [`%${full_name}%`]
     );
-    return res.rows[0]
+    return res.rows[0];
   } catch (error) {
     throw error;
   }
@@ -180,14 +180,14 @@ export async function updateStudent(
   }
 }
 
-export async function softDeleteStudent(id) {
-  try {
-    const res = await pool.query(
-      `update student set is_deleted=true, deleted_at=now() where id=$1 `,
-      [id]
-    );
-    return res;
-  } catch (error) {
-    throw error;
-  }
-}
+// export async function softDeleteStudent(id) {
+//   try {
+//     const res = await pool.query(
+//       `update student set is_deleted=true, deleted_at=now() where id=$1 `,
+//       [id]
+//     );
+//     return res;
+//   } catch (error) {
+//     throw error;
+//   }
+// }

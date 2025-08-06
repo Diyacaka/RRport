@@ -54,9 +54,29 @@ export const studentRegisterSchema = z.object({
 });
 
 export const studentUpdateSchema = z.object({
-  full_name: z.string().min("1").optional(),
+  full_name: z.string().min(1).optional(),
   photo_profile: z.string().url().optional(),
   address: z.string().optional(),
   nisn: z.string().optional(),
   classes: z.string().optional(),
 });
+
+///// - TEACHER SECTION - /////
+
+export const teacherRegisterSchema = z.object({
+  full_name: z.string().min(1,'field cannot be empty'),
+  nip: z.string().min(1, 'field cannot be empty'),
+  subject: z.enum(['wali kelas', 'guru mapel'],{ required_error:"Pick one of the subject"}),
+  phone_number: z.string().min(10, 'field cannot be empty'),
+  address: z.string().min(1, 'field cannot be empty'),
+  photo_profile: z.string().optional()
+})
+
+export const teacherUpdateSchema = z.object({
+  full_name: z.string().min(1).optional(),
+  nip: z.string().min(1).optional(),
+  subject: z.enum(['wali kelas', 'guru mapel']).optional(),
+  phone_number: z.string().optional(),
+  address: z.string().optional(),
+  photo_profile: z.string.optional()
+})

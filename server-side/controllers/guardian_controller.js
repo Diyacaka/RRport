@@ -12,7 +12,6 @@ import {
   getStudentName,
   newGuardian,
   newStudent,
-  softDeleteGuardian,
   updateGuardian,
   updateStudent,
 } from "../models/guardian_model.js";
@@ -119,22 +118,22 @@ export async function updateGuardianHandler(req, res, next) {
   }
 }
 
-export async function softDeleteGuardianHandler(req, res, next) {
-  try {
-    const { id } = req.params;
-    const guardian = await getGuardian(id);
-    console.log(guardian);
+// export async function softDeleteGuardianHandler(req, res, next) {
+//   try {
+//     const { id } = req.params;
+//     const guardian = await getGuardian(id);
+//     console.log(guardian);
 
-    if (!guardian) {
-      res.status(404).json({ messages: "Guardian Does Not exist" });
-    }
+//     if (!guardian) {
+//       res.status(404).json({ messages: "Guardian Does Not exist" });
+//     }
 
-    const result = await softDeleteGuardian(id);
-    res.status(200).json({ messages: "Delete Succes", data: result });
-  } catch (error) {
-    throw error;
-  }
-}
+//     const result = await softDeleteGuardian(id);
+//     res.status(200).json({ messages: "Delete Succes", data: result });
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 ////////// - STUDENT SECTION - //////////
 
@@ -157,7 +156,7 @@ export async function getStudentIDHandler(req, res, next) {
 export async function getStudentNameHandler(req, res, next) {
   try {
     const { full_name } = req.body;
-    
+
     const result = await getStudentName(full_name);
     if (!result) {
       res
@@ -225,12 +224,10 @@ export async function updateStudentHandler(req, res, next) {
       nisn,
       classes
     );
-    return res
-      .status(200)
-      .json({
-        messages: `Profile with id ${id} has been updated`,
-        date: result,
-      });
+    return res.status(200).json({
+      messages: `Profile with id ${id} has been updated`,
+      date: result,
+    });
   } catch (error) {
     throw error;
   }
