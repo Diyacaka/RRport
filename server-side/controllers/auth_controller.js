@@ -9,7 +9,7 @@ export const userByEmail = async (req, res) => {
     const { email } = req.body;
     const result = await getUserEmail(email);
     res.status(200).json({
-      messages: "Ini datanya",
+      messages: "here you go",
       data: result,
     });
   } catch (error) {

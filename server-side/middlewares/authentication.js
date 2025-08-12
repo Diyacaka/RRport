@@ -1,3 +1,4 @@
+import { pool } from "../config/config.js";
 import { verifyToken } from "../helpers/jwt.js";
 
 export async function authentication(req, res, next) {
@@ -20,5 +21,23 @@ export async function authentication(req, res, next) {
     next();
   } catch (error) {
     next(error);
+  }
+}
+
+export async function profileCheck (req, res, next) {
+  try {
+    const userId = req.user.id
+    const result = await pool.query(
+      `select is_profile_complete from users where id = $1
+      `,[userId]
+    )
+
+    if (!result.rows.length || !result.rows[0].is_profile_complete) {
+      return res.status(403).json({messages: `Please complete your profile first`})
+    }
+
+    next()
+  } catch (error) {
+    throw error
   }
 }

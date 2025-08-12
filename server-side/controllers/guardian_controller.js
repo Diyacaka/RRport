@@ -1,4 +1,4 @@
-import { date } from "zod";
+import { date, ZodError } from "zod";
 import {
   guardianRegisterSchema,
   guardianUpdateSchema,
@@ -6,8 +6,8 @@ import {
   studentUpdateSchema,
 } from "../helpers/zod.js";
 import {
-  getGuardian,
   getGuardianID,
+  getGuardianName,
   getStudentID,
   getStudentName,
   newGuardian,
@@ -37,10 +37,10 @@ export async function getGuardianIDHandler(req, res, next) {
   }
 }
 
-export async function getGuardianHandler(req, res, next) {
+export async function getGuardianNameHandler(req, res, next) {
   try {
-    const { full_name } = req.body;
-    const result = await getGuardian(full_name);
+    const { full_name } = req.query;
+    const result = await getGuardianName(full_name);
 
     if (!result) {
       return res.status(404).json({ messages: `Cannot find Guardian` });
@@ -155,7 +155,7 @@ export async function getStudentIDHandler(req, res, next) {
 
 export async function getStudentNameHandler(req, res, next) {
   try {
-    const { full_name } = req.body;
+    const { full_name } = req.query;
 
     const result = await getStudentName(full_name);
     if (!result) {
@@ -173,6 +173,7 @@ export async function getStudentNameHandler(req, res, next) {
 export async function newStudentHandler(req, res, next) {
   try {
     const guardian_id = parseInt(req.params.id);
+    // const allowedRelationship
 
     const guardian = await getGuardianID(guardian_id);
     // console.log(guardian,'guard controller');
@@ -185,23 +186,30 @@ export async function newStudentHandler(req, res, next) {
       birth_date,
       nisn,
       classes,
+      relationship,
     } = studentRegisterSchema.parse(req.body);
+
     const result = await newStudent(
       guardian_id,
       full_name,
-
       photo_profile,
       gender,
       address,
       birth_date,
       nisn,
-      classes
+      classes,
+      relationship
     );
     return res
       .status(200)
       .json({ messages: "new student added", data: result });
   } catch (error) {
-    throw error;
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        messages: `error validation`,
+        errors: error.errors,
+      });
+    }
   }
 }
 

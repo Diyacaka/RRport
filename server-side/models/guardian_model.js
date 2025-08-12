@@ -14,7 +14,7 @@ export async function getGuardianID(id) {
   }
 }
 
-export async function getGuardian(full_name) {
+export async function getGuardianName(full_name) {
   try {
     const res = await pool.query(
       `select full_name,relations,job,address,phone_number from guardian where full_name ILIKE $1`,
@@ -88,6 +88,16 @@ export async function updateGuardian(
   }
 }
 
+export async function guardianDashboard (id) {
+  try {
+    const res = await pool.query(`
+      select 
+      `)
+  } catch (error) {
+    
+  }
+}
+
 // export async function softDeleteGuardian(id) {
 //   try {
 //     const res = await pool.query(
@@ -130,19 +140,20 @@ export async function getStudentName(full_name) {
 export async function newStudent(
   guardian_id,
   full_name,
-
   photo_profile,
   gender,
   address,
   birth_date,
   nisn,
-  classes
+  classes,
+  relationship
 ) {
   try {
     const role_id = 4;
-    const res = await pool.query(
-      `insert into students (guardian_id, full_name,role, photo_profile, gender, address, birth_date, nisn, class)
-      values($1,$2,$3,$4,$5,$6, $7,$8,$9)  returning id`,
+
+    const studentRes = await pool.query(
+      `insert into students (guardian_id, full_name, role, photo_profile, gender, address, birth_date, nisn, class)
+      values($1,$2,$3,$4,$5,$6,$7,$8,$9)  returning id`,
       [
         guardian_id,
         full_name,
@@ -155,7 +166,14 @@ export async function newStudent(
         classes,
       ]
     );
-    return res.rows[0];
+
+    const studentId = studentRes.rows[0].id
+
+    await pool.query(
+      `insert into student_guardian (guardian_id, student_id, relationship)
+      `,[guardian_id, studentId, relationship]
+    )
+    return {id : studentId}
   } catch (error) {
     throw error;
   }

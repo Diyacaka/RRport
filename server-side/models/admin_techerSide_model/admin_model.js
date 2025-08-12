@@ -2,11 +2,24 @@ import { pool } from "../../config/config.js";
 
 ///// ADMIN CRUD ZONE /////
 
+export async function getAdminId(id) {
+  try {
+    const res = await pool.query(
+      `
+      select a.full, a.phone_number, a.photo_profile, r.name as role from admins a left join a on.role_id = r.id where a.id = $1
+      `,
+      [1]
+    );
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getTeacherId(id) {
   try {
     const res = await pool.query(
       `
-            select * from teachers where id = $1
+            select t.full_name, t.nip, t.subject, t.photo_profile, t.sub_role, r.name as role from teachers t left join roles on t.role_id = r.id where t.id = $1
             `,
       [id]
     );

@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+
+
+///// - USER SECTION - /////
+
 export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -51,6 +55,7 @@ export const studentRegisterSchema = z.object({
   }),
   nisn: z.string().min(1, "field cannot be empty"),
   classes: z.string().min(1, "field cannot be empty"),
+  relationship: z.enum(['Father', 'Mother', 'Uncle', 'Aunt', 'Brother', 'Sister'])
 });
 
 export const studentUpdateSchema = z.object({
@@ -78,5 +83,23 @@ export const teacherUpdateSchema = z.object({
   subject: z.enum(['wali kelas', 'guru mapel']).optional(),
   phone_number: z.string().optional(),
   address: z.string().optional(),
-  photo_profile: z.string.optional()
+  photo_profile: z.string().optional()
+})
+
+///// -ADMIN- /////
+
+export const newAdminSchema = z.object({
+  full_name : z.string().min(1, `field cannot be empty`),
+  phone_number : z.string().min(20, `field cannot be empty`),
+  emergency_number : z.string().min(20).optional(),
+  address : z.string().min(1,`field cannot be empty`),
+  photo_profile :z.string().url().optional()
+})
+
+export const updateAdminSChema = z.object({
+  full_name : z.string().optional(),
+  phone_number : z.string().optional(),
+  emergency_number : z.string().optional(),
+  address : z.string().optional(),
+  photo_profile : z.string().optional()
 })
