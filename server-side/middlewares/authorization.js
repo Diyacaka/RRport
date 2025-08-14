@@ -35,7 +35,7 @@ export async function studentUpdateAuth (req, res, next) {
       `, [guardianId, paramStudentId]
     )
     if (result.rowCount === 0) {
-      return res.status(403).json({messages: `Acces Forbidden : You can only update from your own ward`})
+      return res.status(403).json({messages: `Acces Forbidden : You can only update your own ward`})
     }
 
     next()

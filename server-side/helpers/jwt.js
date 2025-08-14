@@ -5,7 +5,7 @@ config()
 const secret = process.env.SECRET_KEY
 
 export async function signToken (payload) {
-    return jwt.sign(payload, secret)
+    return jwt.sign(payload, secret,{expiresIn: `1h`})
 }
 
 export async function verifyToken(token) {

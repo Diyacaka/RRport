@@ -1,4 +1,4 @@
-import { date, ZodError } from "zod";
+import { ZodError } from "zod";
 import {
   guardianRegisterSchema,
   guardianUpdateSchema,
@@ -12,6 +12,7 @@ import {
   getStudentName,
   newGuardian,
   newStudent,
+  newStudentGuardian,
   updateGuardian,
   updateStudent,
 } from "../models/guardian_model.js";
@@ -40,6 +41,7 @@ export async function getGuardianIDHandler(req, res, next) {
 export async function getGuardianNameHandler(req, res, next) {
   try {
     const { full_name } = req.query;
+
     const result = await getGuardianName(full_name);
 
     if (!result) {
@@ -82,7 +84,7 @@ export async function newGuardianHandler(req, res, next) {
       emergency_number
     );
 
-    return res.status(200).json({ messages: "regiter success", data: result });
+    return res.status(200).json({ messages: "register success", data: result });
   } catch (error) {
     throw error;
   }
@@ -117,23 +119,6 @@ export async function updateGuardianHandler(req, res, next) {
     throw error;
   }
 }
-
-// export async function softDeleteGuardianHandler(req, res, next) {
-//   try {
-//     const { id } = req.params;
-//     const guardian = await getGuardian(id);
-//     console.log(guardian);
-
-//     if (!guardian) {
-//       res.status(404).json({ messages: "Guardian Does Not exist" });
-//     }
-
-//     const result = await softDeleteGuardian(id);
-//     res.status(200).json({ messages: "Delete Succes", data: result });
-//   } catch (error) {
-//     throw error;
-//   }
-// }
 
 ////////// - STUDENT SECTION - //////////
 
@@ -172,12 +157,7 @@ export async function getStudentNameHandler(req, res, next) {
 
 export async function newStudentHandler(req, res, next) {
   try {
-    const guardian_id = parseInt(req.params.id);
-    // const allowedRelationship
-
-    const guardian = await getGuardianID(guardian_id);
-    // console.log(guardian,'guard controller');
-
+    const guardian_id = req.user.id;
     const {
       full_name,
       photo_profile,
@@ -188,7 +168,6 @@ export async function newStudentHandler(req, res, next) {
       classes,
       relationship,
     } = studentRegisterSchema.parse(req.body);
-
     const result = await newStudent(
       guardian_id,
       full_name,
@@ -197,21 +176,65 @@ export async function newStudentHandler(req, res, next) {
       address,
       birth_date,
       nisn,
-      classes,
-      relationship
+      classes
     );
+
+    const link = await newStudentGuardian(guardian_id, result.id, relationship);
+
     return res
       .status(200)
-      .json({ messages: "new student added", data: result });
+      .json({ message: `new student added`, data: result, link: link });
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
-        messages: `error validation`,
-        errors: error.errors,
-      });
+      return res.status(400).json({ message: `error validation` });
     }
+    return next(error);
   }
 }
+
+// export async function newStudentHandler(req, res, next) {
+//   try {
+
+//     const guardian_id = parseInt(req.params.id);
+//     // console.log(guardian_id, 'controller');
+
+//     const guardian = await getGuardianID(guardian_id);
+
+//     const {
+//       full_name,
+//       photo_profile,
+//       gender,
+//       address,
+//       birth_date,
+//       nisn,
+//       classes,
+
+//     } = studentRegisterSchema.parse(req.body);
+//     // console.log(req.body, `<<<<req.body`);
+
+//     const result = await newStudent(
+//       guardian,
+//       full_name,
+//       photo_profile,
+//       gender,
+//       address,
+//       birth_date,
+//       nisn,
+//       classes,
+
+//     );
+//     return res
+//       .status(200)
+//       .json({ messages: "new student added", data: result });
+//   } catch (error) {
+//     if (error instanceof ZodError) {
+//       return res.status(400).json({
+//         messages: `error validation`,
+//         errors: error.errors,
+//       });
+//     }
+//   }
+// }
 
 export async function updateStudentHandler(req, res, next) {
   try {

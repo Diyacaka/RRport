@@ -4,6 +4,8 @@ import { pool } from "../config/config.js";
 
 export async function getGuardianID(id) {
   try {
+    // console.log('model');
+
     const res = await pool.query(
       `select full_name, relations,job, address,phone_number from guardian where id = $1 and is_deleted = false`,
       [id]
@@ -88,14 +90,12 @@ export async function updateGuardian(
   }
 }
 
-export async function guardianDashboard (id) {
+export async function guardianDashboard(id) {
   try {
     const res = await pool.query(`
       select 
-      `)
-  } catch (error) {
-    
-  }
+      `);
+  } catch (error) {}
 }
 
 // export async function softDeleteGuardian(id) {
@@ -145,15 +145,15 @@ export async function newStudent(
   address,
   birth_date,
   nisn,
-  classes,
-  relationship
+  classes
 ) {
   try {
     const role_id = 4;
-
-    const studentRes = await pool.query(
-      `insert into students (guardian_id, full_name, role, photo_profile, gender, address, birth_date, nisn, class)
-      values($1,$2,$3,$4,$5,$6,$7,$8,$9)  returning id`,
+    const res = await pool.query(
+      `
+      insert into students (guardian_id, full_name, role, photo_profile, gender, address, birth_date, nisn, class)
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id
+      `,
       [
         guardian_id,
         full_name,
@@ -167,17 +167,73 @@ export async function newStudent(
       ]
     );
 
-    const studentId = studentRes.rows[0].id
-
-    await pool.query(
-      `insert into student_guardian (guardian_id, student_id, relationship)
-      `,[guardian_id, studentId, relationship]
-    )
-    return {id : studentId}
+    return res.rows[0];
   } catch (error) {
     throw error;
   }
 }
+
+export async function newStudentGuardian(
+  guardian_id,
+  student_id,
+  relationship_id
+) {
+  try {
+    const res = await pool.query(
+      `
+      insert into student_guardian (guardian_id, students_id, relationship_id) 
+      values ($1,$2,$3)
+      `,
+      [guardian_id, student_id, relationship_id]
+    );
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
+// export async function newStudent(
+//   guardian_id,
+//   full_name,
+//   photo_profile,
+//   gender,
+//   address,
+//   birth_date,
+//   nisn,
+//   classes,
+// ) {
+//   try {
+//     const role_id = 4;
+//     // console.log(`model newstu`);
+
+//     const studentRes = await pool.query(
+//       `insert into students (guardian_id, full_name, role, photo_profile, gender, address, birth_date, nisn, class)
+//       values($1,$2,$3,$4,$5,$6,$7,$8,$9)  returning id`,
+//       [
+//         guardian_id,
+//         full_name,
+//         role_id,
+//         photo_profile,
+//         gender,
+//         address,
+//         birth_date,
+//         nisn,
+//         classes,
+//       ]
+//     );
+
+// const studentId = studentRes.rows[0].id
+// console.log('<<model ');
+
+// await pool.query(
+//   `insert into student_guardian (guardian_id, student_id, relationship) values ($1,$2,$3)
+//   `,[guardian_id, studentId, relationship]
+// )
+//     return studentRes.rowCount
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 export async function updateStudent(
   id,
@@ -197,15 +253,3 @@ export async function updateStudent(
     throw error;
   }
 }
-
-// export async function softDeleteStudent(id) {
-//   try {
-//     const res = await pool.query(
-//       `update student set is_deleted=true, deleted_at=now() where id=$1 `,
-//       [id]
-//     );
-//     return res;
-//   } catch (error) {
-//     throw error;
-//   }
-// }

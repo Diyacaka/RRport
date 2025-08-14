@@ -3,6 +3,8 @@ import { signToken } from "../helpers/jwt.js";
 import { loginSchema, registerSchema } from "../helpers/zod.js";
 import { ErrorHandler } from "../middlewares/error_handler.js";
 import { getUserEmail, newUSer } from "../models/auth_model.js";
+import { config } from "dotenv";
+config();
 
 export const userByEmail = async (req, res) => {
   try {
@@ -19,25 +21,47 @@ export const userByEmail = async (req, res) => {
 
 export const register = async (req, res, next) => {
   try {
+    const ACCESS = process.env.ACCESS;
     const { email, password, role_id } = registerSchema.parse({
       ...req.body,
       role_id: Number(req.body.role_id),
     });
+    let parsedRole = parseInt(req.body.role_id, 10);
+    if (isNaN(parsedRole)) {
+      parsedRole = 3; // default
+    }
+    // if (role_id === 2) {
+    //   res.status(409).json({message: `Cannot `})
+    // }
 
     const existingEmail = await getUserEmail(email);
     // console.log(existingEmail, `<exist email`);
 
     if (existingEmail) {
-      res.status(409).json({ messages: `Email already registered` });
+      return res.status(409).json({ messages: `Email already registered` });
     }
-    
+
+    let trueRoleId = parsedRole;
+
+    if (email.toLowerCase().includes(ACCESS)) {
+      trueRoleId = 2;
+    }
+
+    if (trueRoleId === 1) {
+      return res.status(403).json({ message: `Cannot pick this role` });
+    }
+
+    if (trueRoleId === 2 && !email.toLowerCase().includes(`guru`)) {
+      return res.status(403).json({ message: `Forbidden register format` });
+    }
+
     const hashedPassword = await hashPassword(password);
-    const result = await newUSer(email, hashedPassword, role_id);
+
+    const result = await newUSer(email, hashedPassword, trueRoleId);
     res.status(201).json({
       message: "Reistrasi sukses",
       uID: result.id,
     });
-
   } catch (error) {
     if (error.code === `23505`) {
       return res.json({ messages: `Email already registered` });
@@ -63,7 +87,7 @@ export const login = async (req, res, next) => {
     const token = await signToken({
       id: user.id,
       role: user.role_id,
-      isProfileComplete: user.is_profile_complete
+      isProfileComplete: user.is_profile_complete,
     });
 
     res.status(200).json({

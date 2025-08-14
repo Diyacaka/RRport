@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-
-
 ///// - USER SECTION - /////
 
 export const registerSchema = z.object({
@@ -10,7 +8,9 @@ export const registerSchema = z.object({
   role_id: z
     .number()
     .int()
-    .refine((val) => [2, 3].includes(val)),
+    .optional()
+    .default(3)
+    // .refine((val) => [2,3].includes(val),{message: `Forbidden acces`})
 });
 
 export const loginSchema = z.object({
@@ -48,14 +48,22 @@ export const guardianUpdateSchema = z.object({
 export const studentRegisterSchema = z.object({
   full_name: z.string().min(1, "field cannot be empty"),
   photo_profile: z.string().url("Photo must be valid").optional(),
-  gender: z.enum(["male", "female"]),
+  gender: z.enum(["Male", "Female"]),
   address: z.string().optional(),
   birth_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid date format (expected YYYY-MM-DD)",
   }),
   nisn: z.string().min(1, "field cannot be empty"),
   classes: z.string().min(1, "field cannot be empty"),
-  relationship: z.enum(['Father', 'Mother', 'Uncle', 'Aunt', 'Brother', 'Sister'])
+  relationship : z.string()
+  // relationship: z.enum([
+  //   "Father",
+  //   "Mother",
+  //   "Uncle",
+  //   "Aunt",
+  //   "Brother",
+  //   "Sister",
+  // ]),
 });
 
 export const studentUpdateSchema = z.object({
@@ -69,37 +77,39 @@ export const studentUpdateSchema = z.object({
 ///// - TEACHER SECTION - /////
 
 export const teacherRegisterSchema = z.object({
-  full_name: z.string().min(1,'field cannot be empty'),
-  nip: z.string().min(1, 'field cannot be empty'),
-  subject: z.enum(['wali kelas', 'guru mapel'],{ required_error:"Pick one of the subject"}),
-  phone_number: z.string().min(10, 'field cannot be empty'),
-  address: z.string().min(1, 'field cannot be empty'),
-  photo_profile: z.string().optional()
-})
+  full_name: z.string().min(1, "field cannot be empty"),
+  nip: z.string().min(1, "field cannot be empty"),
+  subject: z.enum(["wali kelas", "guru mapel"], {
+    required_error: "Pick one of the subject",
+  }),
+  phone_number: z.string().min(10, "field cannot be empty"),
+  address: z.string().min(1, "field cannot be empty"),
+  photo_profile: z.string().optional(),
+});
 
 export const teacherUpdateSchema = z.object({
   full_name: z.string().min(1).optional(),
   nip: z.string().min(1).optional(),
-  subject: z.enum(['wali kelas', 'guru mapel']).optional(),
+  subject: z.enum(["wali kelas", "guru mapel"]).optional(),
   phone_number: z.string().optional(),
   address: z.string().optional(),
-  photo_profile: z.string().optional()
-})
+  photo_profile: z.string().optional(),
+});
 
 ///// -ADMIN- /////
 
 export const newAdminSchema = z.object({
-  full_name : z.string().min(1, `field cannot be empty`),
-  phone_number : z.string().min(20, `field cannot be empty`),
-  emergency_number : z.string().min(20).optional(),
-  address : z.string().min(1,`field cannot be empty`),
-  photo_profile :z.string().url().optional()
-})
+  full_name: z.string().min(1, `field cannot be empty`),
+  phone_number: z.string().min(20, `field cannot be empty`),
+  emergency_number: z.string().min(20).optional(),
+  address: z.string().min(1, `field cannot be empty`),
+  photo_profile: z.string().url().optional(),
+});
 
 export const updateAdminSChema = z.object({
-  full_name : z.string().optional(),
-  phone_number : z.string().optional(),
-  emergency_number : z.string().optional(),
-  address : z.string().optional(),
-  photo_profile : z.string().optional()
-})
+  full_name: z.string().optional(),
+  phone_number: z.string().optional(),
+  emergency_number: z.string().optional(),
+  address: z.string().optional(),
+  photo_profile: z.string().optional(),
+});
