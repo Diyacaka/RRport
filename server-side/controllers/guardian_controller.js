@@ -8,6 +8,7 @@ import {
 import {
   getGuardianID,
   getGuardianName,
+  getStudentGuardian,
   getStudentID,
   getStudentName,
   newGuardian,
@@ -51,6 +52,16 @@ export async function getGuardianNameHandler(req, res, next) {
     return res.status(201).json({ data: result });
   } catch (error) {
     throw error;
+  }
+}
+
+export async function getStudentGuardianHandler(req, res, next){
+  try {
+    const guardian_id = req.user.id
+    const result = await getStudentGuardian(guardian_id)
+    return res.status(200).json({guardian_id, result})
+  } catch (error) {
+    throw error
   }
 }
 

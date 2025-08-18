@@ -88,6 +88,7 @@ export const login = async (req, res, next) => {
       id: user.id,
       role: user.role_id,
       isProfileComplete: user.is_profile_complete,
+      tokenVersion : user.token_version
     });
 
     res.status(200).json({

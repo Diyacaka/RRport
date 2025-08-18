@@ -4,8 +4,6 @@ import { pool } from "../config/config.js";
 
 export async function getGuardianID(id) {
   try {
-    // console.log('model');
-
     const res = await pool.query(
       `select full_name, relations,job, address,phone_number from guardian where id = $1 and is_deleted = false`,
       [id]
@@ -26,6 +24,25 @@ export async function getGuardianName(full_name) {
     return res.rows[0];
   } catch (error) {
     throw error;
+  }
+}
+
+export async function getStudentGuardian(id) {
+  try {
+    const res = await pool.query(`
+      select 
+      g.id as guardian_id, g.full_name as guardian_name, g.photo_profile as guardian_photo, g.relations as guardian_relations, g.address as guardian_address, g.phone_number as guardian_phone_number,
+      s.id as student_id, s.full_name as student_name, s.photo_profile as student_photo, s.gender as student_gender, s.address as student_address, s.birth_date as student_birthDate, s.nisn as student_nisn, s.class as student_class,
+      r.name as relationship
+      from guardian g
+      join student_guardian sg on g.id = sg.guardian_id
+      join students s on s.id = sg.students_id
+      join relationship r on r.id = sg.relationship_id
+      where g.id = $1
+      `,[id])
+      return res.rows
+  } catch (error) {
+    throw error
   }
 }
 
@@ -97,18 +114,6 @@ export async function guardianDashboard(id) {
       `);
   } catch (error) {}
 }
-
-// export async function softDeleteGuardian(id) {
-//   try {
-//     const res = await pool.query(
-//       `update guardian set is_deleted=true, deleted_at=now() where id = $1`,
-//       [id]
-//     );
-//     return res.rowCount;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
 
 ////////// - STUDENT SECTION - //////////
 

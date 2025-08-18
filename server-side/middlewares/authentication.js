@@ -16,7 +16,8 @@ export async function authentication(req, res, next) {
     req.user = {
       id: token.id,
       role: token.role,
-      isProfileComplete : token.isProfileComplete
+      isProfileComplete : token.isProfileComplete,
+      // tokenVersion : token.tokenVersion
     };
     next();
   } catch (error) {
