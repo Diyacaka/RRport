@@ -5,12 +5,17 @@ import { z } from "zod";
 export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  role_id: z
-    .number()
-    .int()
-    .optional()
-    .default(3)
-    // .refine((val) => [2,3].includes(val),{message: `Forbidden acces`})
+  role_id: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === "") {
+        return 3;
+      }
+      return Number(val);
+    },
+    z.number().int().refine((val) => [2, 3].includes(val), { 
+      message: `Forbidden access` 
+    })
+  ).default(3)
 });
 
 export const loginSchema = z.object({
@@ -79,7 +84,7 @@ export const studentUpdateSchema = z.object({
 export const teacherRegisterSchema = z.object({
   full_name: z.string().min(1, "field cannot be empty"),
   nip: z.string().min(1, "field cannot be empty"),
-  subject: z.enum(["wali kelas", "guru mapel"], {
+  sub_role: z.enum(["wali kelas", "guru mapel"], {
     required_error: "Pick one of the subject",
   }),
   phone_number: z.string().min(10, "field cannot be empty"),

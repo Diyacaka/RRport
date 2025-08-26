@@ -5,7 +5,7 @@ import { pool } from "../config/config.js";
 export async function getGuardianID(id) {
   try {
     const res = await pool.query(
-      `select full_name, relations,job, address,phone_number from guardian where id = $1 and is_deleted = false`,
+      `select full_name, relations, job, address, phone_number from guardian where id = $1 and is_deleted = false`,
       [id]
     );
     return res.rows[0];

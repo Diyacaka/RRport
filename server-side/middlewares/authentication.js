@@ -1,5 +1,6 @@
 import { pool } from "../config/config.js";
 import { verifyToken } from "../helpers/jwt.js";
+import { getUserId } from "../models/auth_model.js";
 
 export async function authentication(req, res, next) {
   try {
@@ -8,15 +9,33 @@ export async function authentication(req, res, next) {
       return res.status(401).json({ messages: `you need to login first` });
     }
 
-    const token = await verifyToken(header.split(" ")[1]);
-    if (!token) {
-      return res.status(403).json({ messages: `invalid or expired token` });
+    const token = header.split(" ")[1]
+    let decoded
+    try {
+      decoded = await verifyToken(token)
+    } catch (error) {
+      return res.status(403).json({messages: "invalid or expired token"})
+    }
+    // await verifyToken(header.split(" ")[1]);
+
+    // if (!token) {
+    //   return res.status(403).json({ messages: `invalid or expired token` });
+    // }
+
+    const userById = await getUserId(decoded.id)
+    if (!userById) {
+      return res.status(404).json({messages: `users with id ${token.id} does not exist`})
     }
 
+    // userById.
+    // if (userById.token_version !== token.tokenVersion) {
+    //   return res.status(404).json({messages: `access key expired, try to login again`})
+    // }
+
     req.user = {
-      id: token.id,
-      role: token.role,
-      isProfileComplete : token.isProfileComplete,
+      id: decoded.id,
+      role: decoded.role,
+      isProfileComplete : decoded.isProfileComplete,
       // tokenVersion : token.tokenVersion
     };
     next();

@@ -4,6 +4,7 @@ export async function newTeacher(
   user_id,
   full_name,
   role_id,
+  sub_role,
   nip,
   subject,
   phone_number,
@@ -12,13 +13,14 @@ export async function newTeacher(
 ) {
   try {
     const res = await pool.query(
-      `insert into teachers (user_id, full_name,role, nip, subject, phone_number, address,photo_profile)
-            values ($1, $2, $3, $4,$5,$6,$7, $8) returning id
+      `insert into teachers (user_id, full_name, role, sub_role, nip, subject, phone_number, address,photo_profile)
+            values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id
             `,
       [
         user_id,
         full_name,
         role_id,
+        sub_role,
         nip,
         subject,
         phone_number,
@@ -28,7 +30,7 @@ export async function newTeacher(
     );
 
     await pool.query(
-      `update users set is_profile_completed = true where id = $1`,
+      `update users set is_profile_complete = true where id = $1`,
       [user_id]
     );
     return res;

@@ -19,8 +19,8 @@ export async function getTeacherId(id) {
   try {
     const res = await pool.query(
       `
-            select t.full_name, t.nip, t.subject, t.photo_profile, t.sub_role, r.name as role from teachers t left join roles on t.role_id = r.id where t.id = $1
-            `,
+      select t.full_name, t.nip, t.subject, t.photo_profile, t.sub_role, r.name as role from teachers t left join roles on t.role_id = r.id where t.id = $1
+      `,
       [id]
     );
     return res.rows[0];
@@ -112,6 +112,19 @@ export async function updateAdmins(
     );
     return res;
   } catch (error) {}
+}
+
+
+///// ADMIN CRUD2 ZONE /////
+
+export async function newClass () {
+  try {
+    const res = await pool.query(`
+      insert into classes (class_name, academic_year)
+      `)
+  } catch (error) {
+    
+  }
 }
 
 ///// ADMIN DANGER ZONE /////
