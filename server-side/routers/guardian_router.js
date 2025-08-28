@@ -8,19 +8,19 @@ const guardianRouter = express.Router()
 
 //GUARDIAN SECTION//
 
-guardianRouter.get('/guardian/:id', getGuardianIDHandler)
-guardianRouter.get('/guardian', getGuardianNameHandler)
-guardianRouter.get('/guardian', authentication, getStudentGuardianHandler)
+guardianRouter.get('/:id',authentication, getGuardianIDHandler)
+guardianRouter.get('/',authentication, getGuardianNameHandler)
+guardianRouter.get('/wards', authentication, getStudentGuardianHandler)
 
-guardianRouter.post('/guardian', authentication ,newGuardianHandler)
+guardianRouter.post('/', authentication ,newGuardianHandler)
 
-guardianRouter.patch('/guardian/:id', authentication, updateGuardianHandler)
+guardianRouter.patch('/:id', authentication, updateGuardianHandler)
 
 
 //STUDENT SECTION//
 
-guardianRouter.get('/student/:id', getStudentIDHandler)
-guardianRouter.get('/student', getStudentNameHandler)
+guardianRouter.get('/student/:id',authentication, getStudentIDHandler)
+guardianRouter.get('/student',authentication, getStudentNameHandler)
 
 guardianRouter.post('/student/:id', authentication, profileCheck, newStudentHandler)
 

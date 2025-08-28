@@ -1,7 +1,18 @@
 import { comparePassword, hashPassword } from "../helpers/bcrypt.js";
-import { decodeToken, generateAccessToken, generateRefreshToken, verifyToken } from "../helpers/jwt.js";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  Unauthorized,
+} from "../helpers/enhanchedError.js";
+import {
+  decodeToken,
+  generateAccessToken,
+  generateRefreshToken,
+  verifyToken,
+} from "../helpers/jwt.js";
 import { loginSchema, registerSchema } from "../helpers/zod.js";
-import { ErrorHandler } from "../middlewares/error_handler.js";
+// import { ErrorHandler } from "../middlewares/error_handler.js";
 import {
   getRefreshToken,
   getUserEmail,
@@ -15,7 +26,7 @@ config();
 
 const NODE_ENV = process.env.NODE_ENV;
 
-export const userByEmail = async (req, res) => {
+export const userByEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
     const result = await getUserEmail(email);
@@ -24,58 +35,43 @@ export const userByEmail = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    throw error;
+    next(error);
   }
 };
 
 export const register = async (req, res, next) => {
   try {
     const ACCESS = process.env.ACCESS;
-    const {email, password, role_id} = registerSchema.parse(req.body)
-    // const { email, password, role_id } = registerSchema.parse({
-    //   ...req.body,
-    //   role_id: Number(req.body.role_id),
-    // });
-    // let parsedRole = parseInt(req.body.role_id, 10);
-    // if (isNaN(parsedRole)) {
-    //   parsedRole = 3; // default
-    // }
-    // if (role_id === 2) {
-    //   res.status(409).json({message: `Cannot `})
-    // }
+    const { email, password, role_id } = registerSchema.parse(req.body);
+
     let trueRoleId = role_id;
 
     const existingEmail = await getUserEmail(email);
-    // console.log(existingEmail, `<exist email`);
 
     if (existingEmail) {
-      return res.status(409).json({ messages: `Email already registered` });
+      throw new ConflictError(`Email already registered`);
     }
-
 
     if (email.toLowerCase().includes(ACCESS)) {
       trueRoleId = 2;
     }
 
     if (trueRoleId === 1) {
-      return res.status(403).json({ message: `Cannot pick this role` });
+      throw new ForbiddenError(`Forbidden format, Cannot pick this role`);
     }
 
     if (trueRoleId === 2 && !email.toLowerCase().includes(ACCESS)) {
-      return res.status(403).json({ message: `Forbidden register format` });
+      throw new ForbiddenError(`Forbidden format registration, try again`);
     }
 
     const hashedPassword = await hashPassword(password);
 
     const result = await newUSer(email, hashedPassword, trueRoleId);
     res.status(201).json({
-      message: "Reistrasi sukses",
+      message: "Reistrasi Success",
       uID: result.id,
     });
   } catch (error) {
-    if (error.code === `23505`) {
-      return res.json({ messages: `Email already registered` });
-    }
     next(error);
   }
 };
@@ -86,18 +82,17 @@ export const login = async (req, res, next) => {
 
     const user = await getUserEmail(email);
     if (!user) {
-      return res.status(404).json({ messages: `user does not exist` });
+      throw new NotFoundError(`User with email ${email} not found`);
     }
 
     const checkPassword = await comparePassword(password, user.password);
     if (!checkPassword) {
-      return res.status(404).json({ messages: `wrong password` });
+      throw new Unauthorized(`Wrong Credential(Password)`);
     }
 
-    const accessToken = await generateAccessToken(user)
-    const refreshToken = await generateRefreshToken(user)
+    const accessToken = await generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user);
 
-    // const { accessToken, refreshToken } = generateTokens(user);
 
     const decode = await decodeToken(refreshToken);
 
@@ -109,12 +104,6 @@ export const login = async (req, res, next) => {
       sameSite: "Strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    // const token = await signToken({
-    //   id: user.id,
-    //   role: user.role_id,
-    //   isProfileComplete: user.is_profile_complete,
-    //   // tokenVersion : user.token_version
-    // });
 
     res.status(200).json({
       messages: `Login succesfull complete your profile`,
@@ -129,42 +118,42 @@ export const refresh = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(401).json({ messages: `refresh token not found` });
+      throw new Unauthorized(`Refresh Token not found, try login again`);
     }
 
     const storedRefreshToken = await getRefreshToken(refreshToken);
     if (!storedRefreshToken) {
-      return res.status(401).json({ messages: `invalid or expired token` });
+      throw new Unauthorized(`Token might expired or invalid`);
     }
 
     const decoded = await decodeToken(refreshToken);
 
-    const user = await getUserId(decoded.id)
+    const user = await getUserId(decoded.id);
 
-    const accessToken = await generateAccessToken(user)
+    const accessToken = await generateAccessToken(user);
     res.status(200).json({ accessToken });
   } catch (error) {
-    throw error;
+    next();
   }
 };
 
 export const logout = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(400).json({messages: `No refresh token was not found`})
+      throw new Unauthorized(`No Refresh_Token was found`);
     }
 
-    await revokeRefreshToken(refreshToken)
+    await revokeRefreshToken(refreshToken);
 
-    res.clearCookie("refreshToken",{
-      httpOnly:true,
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
       secure: NODE_ENV === "production",
-      sameSite: "strict"
-    })
+      sameSite: "strict",
+    });
 
-    res.status(200).json({messages: `Logout Success`})
+    res.status(200).json({ messages: `Logout Success` });
   } catch (error) {
-    throw error
+    next();
   }
-}
+};

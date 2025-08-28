@@ -1,5 +1,47 @@
 import { pool } from "../../config/config.js";
 
+export async function getTeacherById (id) {
+  try {
+    const res = await pool.query(`
+      select full_name, role, nip, sub_role, subject from teachers where id = $1
+      `,[id])
+      return res.rows[0]
+  } catch (error) {
+    throw error
+  }
+}
+
+export async function getTeacherByName (name) {
+  try {
+    const res = await pool.query(`
+      select full_name, role, sub_role, nip, subject, phone_number, photo_profile from teachers where name = $1
+      `, [name])
+      return res.rows[0]
+  } catch (error) {
+    throw error
+  }
+}
+
+export async function getGuardianWardsByName (guardianName) {
+  try {
+    const res = await pool.query(`
+      select 
+      g.id as guardian_id, g.full_name as guardian_name, g.photo_profile as guardian_photo, g.address as guardian_address, g.phone_number as guardian_phone_number,
+      s.id as student_id, s.full_name as student_name, s.photo_profile as student_photo, s.gender as student_gender, s.address as student_address, s.birth_date as student_birthdate, s.nisn as student_nisn, s.class as student_class,
+      r.name as relationship
+      from guardian g
+      join student_guardian sg on g.id = sg.guardian_id
+      join students s on s.id = sg.students_id
+      join relationship r on r.id = sg.relationship_id
+      where g.full_name ilike $1
+      `,[`%${guardianName}%`])
+
+      return res.rows
+  } catch (error) {
+    throw error
+  }
+}
+
 export async function newTeacher(
   user_id,
   full_name,

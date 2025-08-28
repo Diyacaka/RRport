@@ -203,50 +203,6 @@ export async function newStudentHandler(req, res, next) {
   }
 }
 
-// export async function newStudentHandler(req, res, next) {
-//   try {
-
-//     const guardian_id = parseInt(req.params.id);
-//     // console.log(guardian_id, 'controller');
-
-//     const guardian = await getGuardianID(guardian_id);
-
-//     const {
-//       full_name,
-//       photo_profile,
-//       gender,
-//       address,
-//       birth_date,
-//       nisn,
-//       classes,
-
-//     } = studentRegisterSchema.parse(req.body);
-//     // console.log(req.body, `<<<<req.body`);
-
-//     const result = await newStudent(
-//       guardian,
-//       full_name,
-//       photo_profile,
-//       gender,
-//       address,
-//       birth_date,
-//       nisn,
-//       classes,
-
-//     );
-//     return res
-//       .status(200)
-//       .json({ messages: "new student added", data: result });
-//   } catch (error) {
-//     if (error instanceof ZodError) {
-//       return res.status(400).json({
-//         messages: `error validation`,
-//         errors: error.errors,
-//       });
-//     }
-//   }
-// }
-
 export async function updateStudentHandler(req, res, next) {
   try {
     const { id } = req.body;
