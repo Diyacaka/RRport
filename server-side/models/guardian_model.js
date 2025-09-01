@@ -14,6 +14,20 @@ export async function getGuardianID(id) {
   }
 }
 
+export async function getGuardianIdByUIDuser(user_id) {
+ try {
+  const res = await pool.query(
+    `select id as guardian_id, full_name, phone_number from guardian
+    where user_id = $1 and is_deleted = false  
+    `,
+    [user_id]
+  )
+  return res.rows
+ } catch (error) {
+  throw error
+ } 
+}
+
 export async function getGuardianName(full_name) {
   try {
     const res = await pool.query(
@@ -40,7 +54,7 @@ export async function getStudentGuardian(id) {
       join relationship r on r.id = sg.relationship_id
       where g.id = $1
       `,[id])
-      return res.rows
+      return res.rows[0]
   } catch (error) {
     throw error
   }
@@ -187,11 +201,11 @@ export async function newStudentGuardian(
     const res = await pool.query(
       `
       insert into student_guardian (guardian_id, students_id, relationship_id) 
-      values ($1,$2,$3)
+      values ($1,$2,$3) returning *
       `,
       [guardian_id, student_id, relationship_id]
     );
-    return res.rows[0];
+    return res.rows[0]
   } catch (error) {
     throw error;
   }

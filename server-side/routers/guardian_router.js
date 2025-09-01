@@ -8,9 +8,9 @@ const guardianRouter = express.Router()
 
 //GUARDIAN SECTION//
 
-guardianRouter.get('/:id',authentication, getGuardianIDHandler)
-guardianRouter.get('/',authentication, getGuardianNameHandler)
 guardianRouter.get('/wards', authentication, getStudentGuardianHandler)
+guardianRouter.get('/by-id/:id',authentication, getGuardianIDHandler)
+guardianRouter.get('/',authentication, getGuardianNameHandler)
 
 guardianRouter.post('/', authentication ,newGuardianHandler)
 

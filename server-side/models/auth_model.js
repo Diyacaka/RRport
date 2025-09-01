@@ -3,7 +3,7 @@ import { pool } from "../config/config.js";
 export const getUserEmail = async (email) => {
   try {
     const res = await pool.query(`select * from users where email = $1`, [
-      email,
+      email
     ]);
 
     return res.rows[0];
