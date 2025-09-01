@@ -2,11 +2,11 @@ import { pool } from "../config/config.js";
 
 ////////// - GUARDIAN SECTION - //////////
 
-export async function getGuardianID(id) {
+export async function getGuardianID(user_id) {
   try {
     const res = await pool.query(
-      `select full_name, relations, job, address, phone_number from guardian where id = $1 and is_deleted = false`,
-      [id]
+      `select id as guardian_id, full_name, relations, job, address, phone_number from guardian where user_id = $1 and is_deleted = false`,
+      [user_id]
     );
     return res.rows[0];
   } catch (error) {
@@ -41,7 +41,7 @@ export async function getGuardianName(full_name) {
   }
 }
 
-export async function getStudentGuardian(id) {
+export async function getStudentGuardian(guardian_id) {
   try {
     const res = await pool.query(`
       select 
@@ -53,8 +53,8 @@ export async function getStudentGuardian(id) {
       join students s on s.id = sg.students_id
       join relationship r on r.id = sg.relationship_id
       where g.id = $1
-      `,[id])
-      return res.rows[0]
+      `,[guardian_id])
+      return res.rows
   } catch (error) {
     throw error
   }

@@ -59,20 +59,40 @@ export async function getGuardianNameHandler(req, res, next) {
 export async function getStudentGuardianHandler(req, res, next){
   try {
     const guardian = await getGuardianID(req.user.id)
+    if (!guardian) {
+      throw new NotFoundError()
+    }
     // const {guardian_id} = await getGuardianIdByUIDuser(guardian)
-    // console.log(guardian_id);
+    console.log(guardian);
     
-    const guardian_wards = await Promise.all(
-      guardian.map(g=>(g.guardian_id))
-    )
+    const rows = await getStudentGuardian(guardian.guardian_id)
+    // console.log(rows);
 
-    const result = guardian_wards.flat()
+    const wards = rows.map(temp => ({
+      id: temp.student_id,
+      name: temp.student_name,
+      photo: temp.student_photo,
+      gender: temp.student_gender,
+      address: temp.student_address,
+      birthDate: temp.student_birtDate,
+      nisn: temp.student_nisn,
+      class: temp.student_calss,
+      // relationship: temp.relationship
+    }))
 
-    // const result = await getStudentGuardian(guardian_id)
-
-    return res.status(200).json({guardian_wards, result})
+    return res.status(200).json({
+      guardian: {
+        id: guardian.guardian_id,
+        name: guardian.full_name,
+        photo: guardian.photo_profile || "",
+        relationship: guardian.relations,
+        address: guardian.address,
+        phone: guardian.phone_number
+      },
+      wards
+    })
   } catch (error) {
-    throw error
+    next(error)
   }
 }
 
