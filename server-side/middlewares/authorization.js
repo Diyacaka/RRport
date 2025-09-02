@@ -1,3 +1,6 @@
+import { pool } from "../config/config.js";
+import { getGuardianID, getStudentGuardianData } from "../models/guardian_model.js";
+
 export async function authorizationTeacher(req, res, next) {
   try {
     const { role_id } = req.user;
@@ -28,18 +31,22 @@ export async function userAuthorization (req, res, next) {
 
 export async function studentUpdateAuth (req, res, next) {
   try {
-    const guardianId = req.user.id
-    const paramStudentId = req.params.studentId
-    const result = await pool.query(
-      ` select * from student_guardian where guardian_id = $1 and student_id = $2
-      `, [guardianId, paramStudentId]
-    )
+    const {guardian_id} = await getGuardianID(req.user.id)
+    const paramStudentId = req.params.id
+    // console.log(guardian_id,'guardian');
+    // console.log(paramStudentId, 'studentid');
+    
+    
+
+    const result = await getStudentGuardianData(paramStudentId, guardian_id)
+    // console.log(result, 'result auth');
+    
     if (result.rowCount === 0) {
       return res.status(403).json({messages: `Acces Forbidden : You can only update your own ward`})
     }
 
     next()
   } catch (error) {
-    throw error
+    next(error)
   }
 }

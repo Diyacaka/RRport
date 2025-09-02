@@ -10,7 +10,7 @@ import {
   getGuardianIdByUIDuser,
   getGuardianName,
   getStudentGuardian,
-  getStudentID,
+  getStudentProfile,
   getStudentName,
   newGuardian,
   newStudent,
@@ -134,18 +134,18 @@ export async function newGuardianHandler(req, res, next) {
 
 export async function updateGuardianHandler(req, res, next) {
   try {
-    const { id } = req.params;
-    const guardian = await getGuardianID(id);
+    const guardian = await getGuardianID(req.user.id);
 
-    console.log(guardian);
+    // console.log(guardian,'guardian');
 
     if (!guardian) {
-      return res
-        .status(404)
-        .json({ messages: "id from guardian does not exist" });
+      throw new NotFoundError()
     }
 
     const data = guardianUpdateSchema.parse(req.body);
+    // console.log(data,'data');
+    
+
     const result = await updateGuardian(
       data.full_name,
       data.relations,
@@ -153,28 +153,33 @@ export async function updateGuardianHandler(req, res, next) {
       data.address,
       data.phone_number,
       data.emergency_number ?? "-",
-      id
+      guardian.guardian_id
     );
 
     return res.status(200).json({ messages: `update succes`, data: result });
   } catch (error) {
-    throw error;
+    next(error)
   }
 }
 
 ////////// - STUDENT SECTION - //////////
 
-export async function getStudentIDHandler(req, res, next) {
+export async function getStudentProfileHandler(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await getStudentID(id);
+
+    const {guardian_id} = await getGuardianID(req.user.id)
+
+    // console.log(id, guardian_id);
+    const result = await getStudentProfile(id, guardian_id);
+    
     if (!result) {
       throw new NotFoundError()
     }
 
     return res.status(200).json({ data: result });
   } catch (error) {
-    next()
+    next(error)
   }
 }
 
@@ -235,14 +240,20 @@ export async function newStudentHandler(req, res, next) {
 
 export async function updateStudentHandler(req, res, next) {
   try {
-    const { id } = req.body;
-    const student = await getStudentID(id);
+    const { id } = req.params;
+    const {guardian_id} = await getGuardianID(req.user.id)
+    console.log(id,'id');
+    console.log(guardian_id,'guardianid');
+    
+
+    const student = await getStudentProfile(id, guardian_id);
+    console.log(student,'studentporifle');
+    
+
     if (!student) {
-      return res
-        .status(404)
-        .json({ messages: `Cannot find student with id${id}` });
+      throw new NotFoundError()
     }
-    const { full_name, photo_profile, address, nisn, classes } =
+    const { full_name, photo_profile, address, nisn, classes   } =
       studentUpdateSchema.parse(req.body);
     const result = await updateStudent(
       id,
@@ -257,6 +268,6 @@ export async function updateStudentHandler(req, res, next) {
       date: result,
     });
   } catch (error) {
-    throw error;
+    next(error)
   }
 }
