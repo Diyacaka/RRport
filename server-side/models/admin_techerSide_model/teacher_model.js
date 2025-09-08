@@ -3,7 +3,7 @@ import { pool } from "../../config/config.js";
 export async function getTeacherById (id) {
   try {
     const res = await pool.query(`
-      select full_name, role, nip, sub_role, subject from teachers where id = $1
+      select id, full_name, role, nip, sub_role, subject from teachers where id = $1
       `,[id])
       return res.rows[0]
   } catch (error) {
@@ -99,5 +99,42 @@ export async function updateTeacher(
     return res.rowCount;
   } catch (error) {
     throw error;
+  }
+}
+
+
+///// REPORTS/TEACHER SIDE /////
+
+export async function getStudentProfile () {
+  try {
+    const res = await pool.query(`
+      select s.id, s.full_name
+      `)
+  } catch (error) {
+    
+  }
+}
+
+export async function getStudentReport () {
+  try {
+    const res = await pool.query(`
+      with student_profile as{
+      select
+      s.id,
+      s.full_name,
+      s.photo_profile,
+      s.address,
+      s.birth_date,
+      s.nisn,
+      s.class,
+      json_build_object(
+      'id', c.id,,
+      'name', c.name) as class
+      from students s
+      join classes c on c.class_id
+      }
+      `)
+  } catch (error) {
+    
   }
 }

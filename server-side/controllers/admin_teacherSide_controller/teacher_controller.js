@@ -1,18 +1,21 @@
 import { teacherRegisterSchema } from "../../helpers/zod.js";
-import { getGuardianWardsByName, newTeacher } from "../../models/admin_techerSide_model/teacher_model.js";
+import {
+  getGuardianWardsByName,
+  newTeacher,
+} from "../../models/admin_techerSide_model/teacher_model.js";
 
-export async function getGuardianWardsByNameHandler (req, res, next) {
+export async function getGuardianWardsByNameHandler(req, res, next) {
   try {
-    const {full_name} = req.query
+    const { full_name } = req.query;
 
-    const rawData = await getGuardianWardsByName(full_name)
+    const rawData = await getGuardianWardsByName(full_name);
     if (rawData.length === 0) {
-      return res.status(404).json({messages:`Guardian not found`})
+      return res.status(404).json({ messages: `Guardian not found` });
     }
 
-    const guardian = {}
+    const guardian = {};
 
-    rawData.forEach(row => {
+    rawData.forEach((row) => {
       if (!guardian[row.guardian_id]) {
         guardian[row.guardian_id] = {
           guardian_id: row.guardian_id,
@@ -20,8 +23,8 @@ export async function getGuardianWardsByNameHandler (req, res, next) {
           guardian_photo: row.guardian_photo,
           guardian_address: row.guardian_address,
           guarddian_phone_number: row.guardian_phone_number,
-          wards: []
-        }
+          wards: [],
+        };
       }
 
       guardian[row.guardian_id].wards.push({
@@ -33,15 +36,15 @@ export async function getGuardianWardsByNameHandler (req, res, next) {
         student_birthdate: row.student_birthdate,
         student_nisn: row.student_nisn,
         student_class: row.student_class,
-        relationship: row.relationship
-      })
-    })
+        relationship: row.relationship,
+      });
+    });
 
-    const guardianArray = Object.values(guardian)
+    const guardianArray = Object.values(guardian);
 
-    return res.status(200).json({result: guardianArray})
+    return res.status(200).json({ result: guardianArray });
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
@@ -53,8 +56,15 @@ export async function newTeacherHandler(req, res, next) {
         messages: "Profile already completed",
       });
     }
-    const { full_name,sub_role, nip, subject, phone_number, address, photo_profile } =
-      teacherRegisterSchema.parse(req.body);
+    const {
+      full_name,
+      sub_role,
+      nip,
+      subject,
+      phone_number,
+      address,
+      photo_profile,
+    } = teacherRegisterSchema.parse(req.body);
     const result = await newTeacher(
       user_id,
       full_name,
