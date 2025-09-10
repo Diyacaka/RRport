@@ -223,6 +223,8 @@ export async function newStudentHandler(req, res, next) {
   try {
     const guardian = await getGuardianIdByUIDuser(req.user.id);
     const { guardian_id } = guardian[0];
+    console.log(guardian_id, '<guardianid');
+    
 
     const {
       full_name,

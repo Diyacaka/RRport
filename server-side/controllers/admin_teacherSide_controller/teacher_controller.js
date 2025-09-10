@@ -1,56 +1,62 @@
-import { teacherRegisterSchema } from "../../helpers/zod.js";
+import { newReportSchema, teacherRegisterSchema } from "../../helpers/zod.js";
 import {
-  getGuardianWardsByName,
+  getTeacherById,
+  newReport,
   newTeacher,
 } from "../../models/admin_techerSide_model/teacher_model.js";
+import { getStudentName } from "../../models/guardian_model.js";
+// getGuardianWardsByName
 
-export async function getGuardianWardsByNameHandler(req, res, next) {
-  try {
-    const { full_name } = req.query;
+// export async function getGuardianWardsByNameHandler(req, res, next) {
+//   try {
+//     const { full_name } = req.query;
 
-    const rawData = await getGuardianWardsByName(full_name);
-    if (rawData.length === 0) {
-      return res.status(404).json({ messages: `Guardian not found` });
-    }
+//     const rawData = await getGuardianWardsByName(full_name);
+//     if (rawData.length === 0) {
+//       return res.status(404).json({ messages: `Guardian not found` });
+//     }
 
-    const guardian = {};
+//     const guardian = {};
 
-    rawData.forEach((row) => {
-      if (!guardian[row.guardian_id]) {
-        guardian[row.guardian_id] = {
-          guardian_id: row.guardian_id,
-          guardian_name: row.guardian_name,
-          guardian_photo: row.guardian_photo,
-          guardian_address: row.guardian_address,
-          guarddian_phone_number: row.guardian_phone_number,
-          wards: [],
-        };
-      }
+//     rawData.forEach((row) => {
+//       if (!guardian[row.guardian_id]) {
+//         guardian[row.guardian_id] = {
+//           guardian_id: row.guardian_id,
+//           guardian_name: row.guardian_name,
+//           guardian_photo: row.guardian_photo,
+//           guardian_address: row.guardian_address,
+//           guarddian_phone_number: row.guardian_phone_number,
+//           wards: [],
+//         };
+//       }
 
-      guardian[row.guardian_id].wards.push({
-        student_id: row.student_id,
-        student_name: row.student_name,
-        student_photo: row.student_photo,
-        student_gender: row.student_gender,
-        student_address: row.student_address,
-        student_birthdate: row.student_birthdate,
-        student_nisn: row.student_nisn,
-        student_class: row.student_class,
-        relationship: row.relationship,
-      });
-    });
+//       guardian[row.guardian_id].wards.push({
+//         student_id: row.student_id,
+//         student_name: row.student_name,
+//         student_photo: row.student_photo,
+//         student_gender: row.student_gender,
+//         student_address: row.student_address,
+//         student_birthdate: row.student_birthdate,
+//         student_nisn: row.student_nisn,
+//         student_class: row.student_class,
+//         relationship: row.relationship,
+//       });
+//     });
 
-    const guardianArray = Object.values(guardian);
+//     const guardianArray = Object.values(guardian);
 
-    return res.status(200).json({ result: guardianArray });
-  } catch (error) {
-    throw error;
-  }
-}
+//     return res.status(200).json({ result: guardianArray });
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 export async function newTeacherHandler(req, res, next) {
   try {
     const { id: user_id, role: role_id } = req.user;
+    // const teacherId = await getTeacherById(req.user.id)
+    // console.log(teacherId, user_id, role_id);
+    
     if (req.user.isProfileComplete) {
       return res.status(400).json({
         messages: "Profile already completed",
@@ -80,5 +86,21 @@ export async function newTeacherHandler(req, res, next) {
     return res.status(201).json({ messages: `register success`, data: result });
   } catch (error) {
     throw error;
+  }
+}
+
+///// TEAHCER/REPORT SECTION /////
+
+export async function newReportHandler(req, res, next) {
+  try {
+    const teacher = await getTeacherById(req.user.id)
+    const {} = await getStudentName(req.query)
+    console.log(teacher,full_name);
+    
+    const report = await newReportSchema.parse(req.body)
+    
+    const result = await newReport(full_name)
+  } catch (error) {
+    next (error)
   }
 }

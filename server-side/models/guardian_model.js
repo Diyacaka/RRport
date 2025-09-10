@@ -151,7 +151,7 @@ export async function getStudentName(full_name) {
   try {
     const res = await pool.query(
       `select s.id, s.full_name, s.photo_profile, s.address, s.birth_date, s.nisn, s.class, sg.guardian_id from students s
-      left join student_guardian sg on s.id = sg.student_id
+      left join students_guardian sg on s.id = sg.student_id
       where s.full_name ILIKE $1 and s.is_deleted = false`,
       [`%${full_name}%`]
     );

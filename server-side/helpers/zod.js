@@ -39,7 +39,7 @@ export const guardianRegisterSchema = z.object({
 export const guardianUpdateSchema = z.object({
   full_name: z.string().optional(),
   relations: z.enum(
-    ["Father", "Mother", "Aunt", "Uncle", "Brother", "Sister"],
+    ["Father", "Mother","Grand Parents", "Aunt", "Uncle", "Brother", "Sister"],
     { required_error: "Field cannot be empty" }
   ),
   job: z.string().optional(),
@@ -100,6 +100,18 @@ export const teacherUpdateSchema = z.object({
   address: z.string().optional(),
   photo_profile: z.string().optional(),
 });
+
+///// -TEACHER- /////
+
+export const newReportSchema = z.object({
+  semester: z.enum(["1", "2", "1/2"]),
+  academic_year: z.string().min(1, "Field required"),
+  report_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format (expected YYYY-MM-DD)",
+  }),
+  remarks: z.string().optional()
+})
+
 
 ///// -ADMIN- /////
 
