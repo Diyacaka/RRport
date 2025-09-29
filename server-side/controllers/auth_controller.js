@@ -12,7 +12,6 @@ import {
   verifyToken,
 } from "../helpers/jwt.js";
 import { loginSchema, registerSchema } from "../helpers/zod.js";
-// import { ErrorHandler } from "../middlewares/error_handler.js";
 import {
   getRefreshToken,
   getUserEmail,
@@ -68,7 +67,7 @@ export const register = async (req, res, next) => {
 
     const result = await newUSer(email, hashedPassword, trueRoleId);
     res.status(201).json({
-      message: "Reistrasi Success",
+      message: "Registration Success",
       uID: result.id,
     });
   } catch (error) {
@@ -92,7 +91,6 @@ export const login = async (req, res, next) => {
 
     const accessToken = await generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
-
 
     const decode = await decodeToken(refreshToken);
 

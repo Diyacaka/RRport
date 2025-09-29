@@ -1,5 +1,8 @@
 import { pool } from "../config/config.js";
-import { getGuardianID, getStudentGuardianData } from "../models/guardian_model.js";
+import {
+  getGuardianID,
+  getStudentGuardianData,
+} from "../models/guardian_model.js";
 
 export async function authorizationTeacher(req, res, next) {
   try {
@@ -15,38 +18,42 @@ export async function authorizationTeacher(req, res, next) {
   }
 }
 
-export async function userAuthorization (req, res, next) {
+export async function userAuthorization(req, res, next) {
   try {
-    const tokenUserId = req.user.id
-    const paramUserId = req.params.id
+    const tokenUserId = req.user.id;
+    const paramUserId = req.params.id;
     if (tokenUserId !== paramUserId) {
-      return res.status(403).json({messages: `Acces Forbidden: you can only update your own profile`})
+      return res
+        .status(403)
+        .json({
+          messages: `Acces Forbidden: you can only update your own profile`,
+        });
     }
 
-    next()
+    next();
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-export async function studentUpdateAuth (req, res, next) {
+export async function studentUpdateAuth(req, res, next) {
   try {
-    const {guardian_id} = await getGuardianID(req.user.id)
-    const paramStudentId = req.params.id
-    // console.log(guardian_id,'guardian');
-    // console.log(paramStudentId, 'studentid');
-    
-    
+    const { guardian_id } = await getGuardianID(req.user.id);
+    const student_id = req.params.student_id;
 
-    const result = await getStudentGuardianData(paramStudentId, guardian_id)
+    const result = await getStudentGuardianData(student_id, guardian_id);
     // console.log(result, 'result auth');
-    
+
     if (result.rowCount === 0) {
-      return res.status(403).json({messages: `Acces Forbidden : You can only update your own ward`})
+      return res
+        .status(403)
+        .json({
+          messages: `Acces Forbidden : You can only update your own ward`,
+        });
     }
 
-    next()
+    next();
   } catch (error) {
-    next(error)
+    next(error);
   }
 }

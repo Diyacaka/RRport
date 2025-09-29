@@ -16,21 +16,12 @@ export async function authentication(req, res, next) {
     } catch (error) {
       return res.status(403).json({messages: "invalid or expired token"})
     }
-    // await verifyToken(header.split(" ")[1]);
 
-    // if (!token) {
-    //   return res.status(403).json({ messages: `invalid or expired token` });
-    // }
 
     const userById = await getUserId(decoded.id)
     if (!userById) {
       return res.status(404).json({messages: `users with id ${token.id} does not exist`})
     }
-
-    // userById.
-    // if (userById.token_version !== token.tokenVersion) {
-    //   return res.status(404).json({messages: `access key expired, try to login again`})
-    // }
 
     req.user = {
       id: decoded.id,
