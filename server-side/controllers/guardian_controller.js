@@ -6,7 +6,7 @@ import {
 } from "../helpers/zod.js";
 import {
   getGuardianID,
-  getGuardianIdByUIDuser,
+  // getGuardianIdByUIDuser,
   getGuardianName,
   // getStudentGuardian,
   getStudentProfile,
@@ -130,12 +130,17 @@ export async function newGuardianHandler(req, res, next) {
 
 export async function updateGuardianHandler(req, res, next) {
   try {
-    const userLoggedIn = req.user.id;
+    const { id } = req.user;
+    // console.log(id, 'user');
 
-    const guardians = await getGuardianIdByUIDuser(req.user.id);
-    const guardian = guardians[0];
+    const guardian_param = req.params.id;
+    // console.log(guardian_param, 'param');
 
-    if (!guardian) {
+    const guardians = await getGuardianID(guardian_param);
+    // console.log(guardians, 'model output');
+    // const guardian = guardians[0];
+
+    if (!guardians) {
       throw new NotFoundError();
     }
 
@@ -149,9 +154,9 @@ export async function updateGuardianHandler(req, res, next) {
       guardianForm.phone_number,
       guardianForm.emergency_number,
       guardianForm.occupation_id,
-      userLoggedIn,
+      id,
       guardianForm.relationship_id,
-      guardian.guardian_id
+      guardians.guardian_id
     );
 
     return res.status(200).json({ messages: `update succes`, data: result });
@@ -162,13 +167,13 @@ export async function updateGuardianHandler(req, res, next) {
 
 ////////// - STUDENT SECTION - //////////
 
-export async function getAllStudentHandler (req, res, next) {
+export async function getAllStudentHandler(req, res, next) {
   try {
-    const result = await getAllStudent()
+    const result = await getAllStudent();
 
-    return res.status(200).json({data: result})
+    return res.status(200).json({ data: result });
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 
@@ -192,14 +197,14 @@ export async function getStudentProfileHandler(req, res, next) {
 export async function getStudentNameHandler(req, res, next) {
   try {
     const { full_name } = req.query;
-    const guardian = await getGuardianIdByUIDuser(req.user.id)
-    
+    const { id } = req.params;
+    const guardian = await getGuardianID(id);
+
     const student = await getStudentName(full_name);
     if (!student) {
       throw new NotFoundError(`Student with name ${full_name} does not exist`);
     }
     console.log(student[0].guardian_id);
-    
 
     const result = student.map((s) => {
       if (student[0].guardian_id === guardian[0].guardian_id) {
@@ -228,20 +233,26 @@ export async function getStudentNameHandler(req, res, next) {
 export async function newStudentHandler(req, res, next) {
   try {
     const user_id = req.user.id;
+    const { guardian_id } = req.params;
+    console.log(user_id);
+    console.log(guardian_id);
 
-    let guardian_id;
+    let tempGuardian_id;
 
     if (req.user.role === 3) {
-      const guardian = await getGuardianIdByUIDuser(req.user.id);
-      guardian_id = guardian[0].guardian_id;
+      const guardian = await getGuardianID(guardian_id);
+      tempGuardian_id = guardian.guardian_id;
+      console.log(guardian, 'from sql model');
+      
+      console.log(tempGuardian_id, 'final product');
     } else {
-      guardian_id = req.body.guardian_id;
+      tempGuardian_id = req.body.guardian_id;
     }
 
     const studentForm = studentRegisterSchema.parse(req.body);
 
     const result = await newStudent(
-      user_id,
+      tempGuardian_id,
       studentForm.class_id,
       studentForm.full_name,
       studentForm.photo_profile,
@@ -249,11 +260,11 @@ export async function newStudentHandler(req, res, next) {
       studentForm.address,
       studentForm.birth_date,
       studentForm.nisn,
-      guardian_id
+      user_id
     );
 
     const link = await newStudentGuardian(
-      user_id,
+      tempGuardian_id,
       result.id,
       studentForm.relationship_id
     );
@@ -270,21 +281,18 @@ export async function updateStudentHandler(req, res, next) {
   try {
     const user_id = req.user.id;
     const student_id = req.params.student_id;
-    console.log(user_id,'<userid');
+    console.log(user_id, "<<<userid");
 
-    console.log(student_id,'<studentid');
-    
+    console.log(student_id, "<<<studentid");
 
     const student = await getStudentById(student_id);
     // console.log(student);
-    
 
-    if (!student) {
-      throw new NotFoundError();
-    }
+    // if (!student) {
+    //   throw new NotFoundError();
+    // }
     const studentForm = studentUpdateSchema.parse(req.body);
-    // console.log(studentForm);
-    
+    console.log(studentForm);
 
     const result = await updateStudent(
       student_id,

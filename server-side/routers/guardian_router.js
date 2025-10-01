@@ -12,7 +12,8 @@ import {
   getAllStudentHandler,
 } from "../controllers/guardian_controller.js";
 import { authentication, profileCheck } from "../middlewares/authentication.js";
-import { studentUpdateAuth } from "../middlewares/authorization.js";
+import { studentUpdateAuth, userAuthorization } from "../middlewares/authorization.js";
+import { getAllGuardian } from "../models/guardian_model.js";
 
 const guardianRouter = express.Router();
 
@@ -20,28 +21,30 @@ const guardianRouter = express.Router();
 
 // guardianRouter.get("/wards", authentication, getStudentGuardianHandler);
 guardianRouter.get("/by-id/:id", authentication, getGuardianIDHandler);
-guardianRouter.get("/", authentication, getGuardianNameHandler);
+guardianRouter.get("/guardian_name", authentication, getGuardianNameHandler);
 
-guardianRouter.post("/", authentication, newGuardianHandler);
+guardianRouter.post("/post_guardian", authentication, newGuardianHandler);
 
-guardianRouter.patch("/update", authentication, updateGuardianHandler);
+guardianRouter.patch("/update/:id", authentication, userAuthorization, updateGuardianHandler);
+
+guardianRouter.get("/all_guardians", authentication, getAllGuardian)
 
 //STUDENT SECTION//
 guardianRouter.get("/all_students", getAllStudentHandler);
 
 guardianRouter.get("/student/:id", authentication, getStudentProfileHandler);
 
-guardianRouter.get("/student", authentication, getStudentNameHandler);
+guardianRouter.get("/student/name/:id", authentication, getStudentNameHandler);
 
 guardianRouter.post(
-  "/student",
+  "/student/post_student/:guardian_id",
   authentication,
   profileCheck,
   newStudentHandler
 );
 
 guardianRouter.patch(
-  "/student/:student_id",
+  "/student/:guardian_id/:student_id",
   authentication,
   studentUpdateAuth,
   updateStudentHandler

@@ -2,10 +2,27 @@ import { pool } from "../config/config.js";
 
 ////////// - GUARDIAN SECTION - //////////
 
+export async function getAllGuardian () {
+  try {
+    const res = await pool.query(
+      `
+      select g.id as guardian_id, g.full_name, g.photo_profile,
+      o.name
+      from guardian g
+      left join ocupation o on g.ocupation_id = o.id
+      `
+    )
+
+    return res.rows
+  } catch (error) {
+    throw error
+  }
+}
+
 export async function getGuardianID(id) {
   try {
     const res = await pool.query(
-      `select id as guardian_id, full_name, address, phone_number from guardian where id = $1 and is_deleted = false`,
+      `select id as guardian_id, user_id, full_name, address, phone_number from guardian where id = $1 and is_deleted = false`,
       [id]
     );
     return res.rows[0];
@@ -14,19 +31,19 @@ export async function getGuardianID(id) {
   }
 }
 
-export async function getGuardianIdByUIDuser(user_id) {
- try {
-  const res = await pool.query(
-    `select id as guardian_id, full_name from guardian
-    where user_id = $1 and is_deleted = false  
-    `,
-    [user_id]
-  )
-  return res.rows
- } catch (error) {
-  throw error
- } 
-}
+// export async function getGuardianIdByUIDuser(user_id) {
+//  try {
+//   const res = await pool.query(
+//     `select id, full_name from guardian
+//     where user_id = $1 and is_deleted = false  
+//     `,
+//     [user_id]
+//   )
+//   return res.rows
+//  } catch (error) {
+//   throw error
+//  } 
+// }
 
 export async function getGuardianName(full_name) {
   try {
