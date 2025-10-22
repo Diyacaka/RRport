@@ -1,17 +1,17 @@
-import { comparePassword, hashPassword } from "../helpers/bcrypt.js";
+import { comparePassword, hashPassword } from "../../helpers/bcrypt.js";
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
   Unauthorized,
-} from "../helpers/enhanchedError.js";
+} from "../../helpers/enhanchedError.js";
 import {
   decodeToken,
   generateAccessToken,
   generateRefreshToken,
-  verifyToken,
-} from "../helpers/jwt.js";
-import { loginSchema, registerSchema } from "../helpers/zod.js";
+} from "../../helpers/jwt.js";
+import { loginSchema, registerSchema } from "../../helpers/zod.js";
+import { config } from "dotenv";
 import {
   getRefreshToken,
   getUserEmail,
@@ -19,8 +19,7 @@ import {
   newUSer,
   revokeRefreshToken,
   saveRefreshToken,
-} from "../models/auth_model.js";
-import { config } from "dotenv";
+} from "./auth_model.js";
 config();
 
 const NODE_ENV = process.env.NODE_ENV;

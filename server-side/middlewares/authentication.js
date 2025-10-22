@@ -1,6 +1,6 @@
 import { pool } from "../config/config.js";
 import { verifyToken } from "../helpers/jwt.js";
-import { getUserId } from "../models/auth_model.js";
+import { getUserId } from "../modules/universal/auth_model.js";
 
 export async function authentication(req, res, next) {
   try {
@@ -9,24 +9,25 @@ export async function authentication(req, res, next) {
       return res.status(401).json({ messages: `you need to login first` });
     }
 
-    const token = header.split(" ")[1]
-    let decoded
+    const token = header.split(" ")[1];
+    let decoded;
     try {
-      decoded = await verifyToken(token)
+      decoded = await verifyToken(token);
     } catch (error) {
-      return res.status(403).json({messages: "invalid or expired token"})
+      return res.status(403).json({ messages: "invalid or expired token" });
     }
 
-
-    const userById = await getUserId(decoded.id)
+    const userById = await getUserId(decoded.id);
     if (!userById) {
-      return res.status(404).json({messages: `users with id ${token.id} does not exist`})
+      return res
+        .status(404)
+        .json({ messages: `users with id ${token.id} does not exist` });
     }
 
     req.user = {
       id: decoded.id,
       role: decoded.role,
-      isProfileComplete : decoded.isProfileComplete,
+      isProfileComplete: decoded.isProfileComplete,
       // tokenVersion : token.tokenVersion
     };
     next();
@@ -35,20 +36,23 @@ export async function authentication(req, res, next) {
   }
 }
 
-export async function profileCheck (req, res, next) {
+export async function profileCheck(req, res, next) {
   try {
-    const userId = req.user.id
+    const userId = req.user.id;
     const result = await pool.query(
       `select is_profile_complete from users where id = $1
-      `,[userId]
-    )
+      `,
+      [userId]
+    );
 
     if (!result.rows.length || !result.rows[0].is_profile_complete) {
-      return res.status(403).json({messages: `Please complete your profile first`})
+      return res
+        .status(403)
+        .json({ messages: `Please complete your profile first` });
     }
 
-    next()
+    next();
   } catch (error) {
-    throw error
+    throw error;
   }
 }

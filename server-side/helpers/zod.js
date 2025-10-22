@@ -34,7 +34,7 @@ export const guardianRegisterSchema = z.object({
   address: z.string().min(1, "cannot be empty"),
   phone_number: z.string().min(10, "cannot be empty"),
   emergency_number: z.string().optional(),
-  occupation_id: z.number(),
+  occupation_id: z.preprocess((val) => Number(val), z.number()),
 });
 
 export const guardianUpdateSchema = z.object({
@@ -43,8 +43,18 @@ export const guardianUpdateSchema = z.object({
   address: z.string().optional(),
   phone_number: z.string().optional(),
   emergency_number: z.string().optional(),
-  occupation_id: z.number(),
-  relationship_id: z.number(),
+  occupation_id: z.preprocess((val) => {
+    if (val === null || val === undefined || val === "") {
+      return undefined;
+    }
+    return Number(val);
+  }, z.number().optional()),
+  relationship_id: z.preprocess((val) => {
+    if (val === null || val === undefined || val === "") {
+      return undefined;
+    }
+    return Number(val);
+  }, z.number().optional()),
 });
 
 ///// - STUDENT SECTION - /////
@@ -79,34 +89,37 @@ export const teacherRegisterSchema = z.object({
   emergency_number: z.string().optional(),
   address: z.string().min(1, "field cannot be empty"),
   photo_profile: z.string().optional(),
-  sub_role_id: z
-    .union([z.number(), z.array(z.number())])
-    .refine(
-      (val) => (Array.isArray(val) ? val.length > 0 : true),
-      `field at least need 1 sub role`
-    ),
-  subject_id: z
-    .union([z.number(), z.array(z.number())])
-    .refine(
-      (val) => (Array.isArray(val) ? val.length > 0 : true),
-      `field at least need 1 subject`
-    ),
+  sub_role_id: z.preprocess((val) => {
+    if (Array.isArray(val)) return val.map(Number);
+    if (typeof val === "string") return [Number(val)];
+    return [];
+  }, z.array(z.number()).min(1, "field at least need 1 sub role")),
+  subject_id: z.preprocess((val) => {
+    if (Array.isArray(val)) return val.map(Number);
+    if (typeof val === "string") return [Number(val)];
+    return [];
+  }, z.array(z.number()).min(1, "field at least need 1 subject")),
 });
 
 export const teacherUpdateSchema = z.object({
-  full_name: z.string().min(1).optional(),
-  nip: z.string().min(1).optional(),
+  full_name: z.string().optional(),
+  nip: z.string().optional(),
   phone_number: z.string().optional(),
   emergency_number: z.string().optional(),
   address: z.string().optional(),
   photo_profile: z.url().optional(),
-  sub_role_id: z
-    .union([z.number(), z.array(z.number())])
-    .refine(
-      (val) => (Array.isArray(val) ? val.length > 0 : true),
-      `field at least need 1 sub role`
-    ),
-  subject_id: z.number(),
+  sub_role_id: z.preprocess((val) => {
+    if (val === undefined || val === "" || val === null) return undefined;
+    if (Array.isArray(val)) return val.map(Number);
+    if (typeof val === "string") return [Number(val)];
+    return undefined;
+  }, z.array(z.number()).optional()),
+  subject_id: z.preprocess((val) => {
+    if (val === undefined || val === "" || val === null) return undefined;
+    if (Array.isArray(val)) return val.map(Number);
+    if (typeof val === "string") return [Number(val)];
+    return undefined;
+  }, z.array(z.number()).optional()),
 });
 
 ///// -TEACHER/REPORT- /////
